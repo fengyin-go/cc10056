@@ -1,0 +1,674 @@
+{
+  "domain": "数据工程",
+  "subdirection": "数据分析与数据应用",
+  "app_name": "零售销售宽表与指标口径平台",
+  "app_slug": "sales-metric-platform",
+  "app_desc": "接入多渠道销售订单，完成解析、映射、清洗与宽表装配，按指标口径计算同环比并对账的数据分析平台",
+  "frontend": "vue",
+  "backend": "python",
+  "port_frontend": 5173,
+  "port_backend": 8000,
+  "modules": [
+    {
+      "key": "sales_channel",
+      "name": "销售渠道目录",
+      "entity": "渠道",
+      "fields": [
+        "渠道名称",
+        "渠道类型",
+        "结算口径",
+        "币种",
+        "合并规则"
+      ],
+      "statuses": [
+        "待启用",
+        "已启用",
+        "已停用"
+      ],
+      "actions": [
+        "启用渠道",
+        "停用渠道"
+      ],
+      "action_targets": [
+        "已启用",
+        "已停用"
+      ],
+      "metrics": [
+        "渠道总数",
+        "已启用渠道",
+        "已停用渠道"
+      ],
+      "desc": "维护销售渠道目录与结算口径",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "order_ingest",
+      "name": "订单接入",
+      "entity": "订单批次",
+      "fields": [
+        "批次编号",
+        "渠道标识",
+        "批次行数",
+        "首单时间",
+        "末单时间"
+      ],
+      "statuses": [
+        "待接入",
+        "已接入",
+        "已退回"
+      ],
+      "actions": [
+        "确认接入",
+        "退回批次"
+      ],
+      "action_targets": [
+        "已接入",
+        "已退回"
+      ],
+      "metrics": [
+        "批次总数",
+        "已接入批次",
+        "已退回批次"
+      ],
+      "desc": "按批次接入多渠道销售订单并记录时间边界",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "order_parse",
+      "name": "订单解析",
+      "entity": "解析记录",
+      "fields": [
+        "记录编号",
+        "渠道标识",
+        "字段映射版本",
+        "解析行数",
+        "失败行数"
+      ],
+      "statuses": [
+        "待解析",
+        "已解析",
+        "部分失败"
+      ],
+      "actions": [
+        "执行解析",
+        "标记失败"
+      ],
+      "action_targets": [
+        "已解析",
+        "部分失败"
+      ],
+      "metrics": [
+        "记录总数",
+        "已解析记录",
+        "部分失败记录"
+      ],
+      "desc": "按渠道字段映射版本解析订单明细",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "sku_map",
+      "name": "商品映射",
+      "entity": "映射条目",
+      "fields": [
+        "条目编号",
+        "渠道商品码",
+        "标准商品码",
+        "映射置信",
+        "生效时间"
+      ],
+      "statuses": [
+        "候选",
+        "已生效",
+        "已失效"
+      ],
+      "actions": [
+        "生效条目",
+        "失效条目"
+      ],
+      "action_targets": [
+        "已生效",
+        "已失效"
+      ],
+      "metrics": [
+        "条目总数",
+        "已生效条目",
+        "已失效条目"
+      ],
+      "desc": "把渠道商品码映射到标准商品码并维护置信度",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "store_map",
+      "name": "门店映射",
+      "entity": "门店条目",
+      "fields": [
+        "条目编号",
+        "渠道门店码",
+        "标准门店码",
+        "区域归属",
+        "生效时间"
+      ],
+      "statuses": [
+        "候选",
+        "已生效",
+        "已失效"
+      ],
+      "actions": [
+        "生效条目",
+        "失效条目"
+      ],
+      "action_targets": [
+        "已生效",
+        "已失效"
+      ],
+      "metrics": [
+        "条目总数",
+        "已生效条目",
+        "已失效条目"
+      ],
+      "desc": "把渠道门店码映射到标准门店码与区域归属",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "currency_rate",
+      "name": "汇率换算",
+      "entity": "汇率记录",
+      "fields": [
+        "记录编号",
+        "币种对",
+        "适用日期",
+        "汇率值",
+        "口径来源"
+      ],
+      "statuses": [
+        "待生效",
+        "已生效",
+        "已废弃"
+      ],
+      "actions": [
+        "生效汇率",
+        "废弃汇率"
+      ],
+      "action_targets": [
+        "已生效",
+        "已废弃"
+      ],
+      "metrics": [
+        "记录总数",
+        "已生效记录",
+        "已废弃记录"
+      ],
+      "desc": "维护多币种汇率与适用日期",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "order_clean",
+      "name": "订单清洗",
+      "entity": "清洗记录",
+      "fields": [
+        "记录编号",
+        "重复批次",
+        "缺失字段",
+        "处理动作",
+        "清洗版本"
+      ],
+      "statuses": [
+        "待清洗",
+        "已清洗",
+        "已退单"
+      ],
+      "actions": [
+        "执行清洗",
+        "退回订单"
+      ],
+      "action_targets": [
+        "已清洗",
+        "已退单"
+      ],
+      "metrics": [
+        "记录总数",
+        "已清洗记录",
+        "已退单记录"
+      ],
+      "desc": "处理重复批次与缺失字段生成清洗版本",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "fact_assemble",
+      "name": "销售事实装配",
+      "entity": "装配任务",
+      "fields": [
+        "任务编号",
+        "来源批次",
+        "事实分区",
+        "装配行数",
+        "装配版本"
+      ],
+      "statuses": [
+        "待装配",
+        "装配中",
+        "已完成"
+      ],
+      "actions": [
+        "启动装配",
+        "确认完成"
+      ],
+      "action_targets": [
+        "装配中",
+        "已完成"
+      ],
+      "metrics": [
+        "任务总数",
+        "装配中任务",
+        "已完成任务"
+      ],
+      "desc": "把清洗后的订单装配进销售事实分区",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "wide_join",
+      "name": "宽表关联",
+      "entity": "关联任务",
+      "fields": [
+        "任务编号",
+        "事实分区",
+        "维表组合",
+        "关联键集",
+        "未命中率"
+      ],
+      "statuses": [
+        "待关联",
+        "关联中",
+        "已完成"
+      ],
+      "actions": [
+        "启动关联",
+        "确认完成"
+      ],
+      "action_targets": [
+        "关联中",
+        "已完成"
+      ],
+      "metrics": [
+        "任务总数",
+        "关联中任务",
+        "已完成任务"
+      ],
+      "desc": "把事实分区与维表组合关联生成销售宽表",
+      "page_shape": "dag-graph",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "metric_def",
+      "name": "指标定义",
+      "entity": "指标定义",
+      "fields": [
+        "指标名称",
+        "计算公式",
+        "统计粒度",
+        "过滤条件",
+        "口径版本"
+      ],
+      "statuses": [
+        "草稿",
+        "已发布",
+        "已下线"
+      ],
+      "actions": [
+        "发布指标",
+        "下线指标"
+      ],
+      "action_targets": [
+        "已发布",
+        "已下线"
+      ],
+      "metrics": [
+        "定义总数",
+        "已发布定义",
+        "已下线定义"
+      ],
+      "desc": "维护指标计算公式与口径版本",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "metric_calc",
+      "name": "指标计算",
+      "entity": "计算任务",
+      "fields": [
+        "任务编号",
+        "指标标识",
+        "计算窗口",
+        "输入分区",
+        "结果集版本"
+      ],
+      "statuses": [
+        "待计算",
+        "计算中",
+        "已完成",
+        "需重算"
+      ],
+      "actions": [
+        "启动计算",
+        "触发重算"
+      ],
+      "action_targets": [
+        "计算中",
+        "需重算"
+      ],
+      "metrics": [
+        "任务总数",
+        "计算中任务",
+        "需重算任务"
+      ],
+      "desc": "按指标定义对宽表执行窗口计算",
+      "page_shape": "job-timeline",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "dim_slice",
+      "name": "维度切片",
+      "entity": "切片定义",
+      "fields": [
+        "切片名称",
+        "维度组合",
+        "切片条件",
+        "样本量",
+        "生效标记"
+      ],
+      "statuses": [
+        "草稿",
+        "已生效",
+        "已停用"
+      ],
+      "actions": [
+        "生效切片",
+        "停用切片"
+      ],
+      "action_targets": [
+        "已生效",
+        "已停用"
+      ],
+      "metrics": [
+        "切片总数",
+        "已生效切片",
+        "已停用切片"
+      ],
+      "desc": "定义维度切片用于分维度指标分析",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "compare_period",
+      "name": "同环比对比",
+      "entity": "对比任务",
+      "fields": [
+        "任务编号",
+        "指标标识",
+        "本期窗口",
+        "对照窗口",
+        "差异结论"
+      ],
+      "statuses": [
+        "待对比",
+        "对比中",
+        "已完成"
+      ],
+      "actions": [
+        "启动对比",
+        "确认结论"
+      ],
+      "action_targets": [
+        "对比中",
+        "已完成"
+      ],
+      "metrics": [
+        "任务总数",
+        "对比中任务",
+        "已完成任务"
+      ],
+      "desc": "计算指标同环比并固化差异结论",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "anomaly_scan",
+      "name": "异动扫描",
+      "entity": "扫描任务",
+      "fields": [
+        "任务编号",
+        "指标集合",
+        "检测规则",
+        "异动数",
+        "扫描结论"
+      ],
+      "statuses": [
+        "待扫描",
+        "扫描中",
+        "已完成"
+      ],
+      "actions": [
+        "启动扫描",
+        "确认结论"
+      ],
+      "action_targets": [
+        "扫描中",
+        "已完成"
+      ],
+      "metrics": [
+        "任务总数",
+        "扫描中任务",
+        "已完成任务"
+      ],
+      "desc": "扫描指标异动并输出异动清单",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "reconcile_task",
+      "name": "对账核对",
+      "entity": "对账任务",
+      "fields": [
+        "任务编号",
+        "渠道账期",
+        "平台口径",
+        "差异金额",
+        "对账结论"
+      ],
+      "statuses": [
+        "待对账",
+        "对账中",
+        "已完成"
+      ],
+      "actions": [
+        "启动对账",
+        "确认结论"
+      ],
+      "action_targets": [
+        "对账中",
+        "已完成"
+      ],
+      "metrics": [
+        "任务总数",
+        "对账中任务",
+        "已完成任务"
+      ],
+      "desc": "核对渠道账期与平台口径的销售额差异",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "metric_api",
+      "name": "指标服务",
+      "entity": "服务请求",
+      "fields": [
+        "请求编号",
+        "指标标识",
+        "查询参数",
+        "返回行数",
+        "服务耗时"
+      ],
+      "statuses": [
+        "已受理",
+        "已返回",
+        "已缓存"
+      ],
+      "actions": [
+        "执行查询",
+        "写入缓存"
+      ],
+      "action_targets": [
+        "已返回",
+        "已缓存"
+      ],
+      "metrics": [
+        "请求总数",
+        "已返回请求",
+        "已缓存请求"
+      ],
+      "desc": "对外提供指标查询服务并记录缓存命中",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "metric_report",
+      "name": "指标报表",
+      "entity": "报表文档",
+      "fields": [
+        "报表编号",
+        "覆盖周期",
+        "指标清单",
+        "对比结论",
+        "发布版本"
+      ],
+      "statuses": [
+        "草稿",
+        "已发布",
+        "已归档"
+      ],
+      "actions": [
+        "发布报表",
+        "归档报表"
+      ],
+      "action_targets": [
+        "已发布",
+        "已归档"
+      ],
+      "metrics": [
+        "报表总数",
+        "已发布报表",
+        "已归档报表"
+      ],
+      "desc": "按周期汇编指标报表并管理发布版本",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "lineage_note",
+      "name": "口径血缘说明",
+      "entity": "血缘条目",
+      "fields": [
+        "条目编号",
+        "指标标识",
+        "依赖表清单",
+        "转换说明",
+        "口径版本"
+      ],
+      "statuses": [
+        "待梳理",
+        "已梳理",
+        "已失效"
+      ],
+      "actions": [
+        "梳理条目",
+        "失效条目"
+      ],
+      "action_targets": [
+        "已梳理",
+        "已失效"
+      ],
+      "metrics": [
+        "条目总数",
+        "已梳理条目",
+        "已失效条目"
+      ],
+      "desc": "记录指标口径的血缘依赖与转换说明",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "calc_review",
+      "name": "口径复核台",
+      "entity": "复核事项",
+      "fields": [
+        "事项编号",
+        "争议指标",
+        "原口径",
+        "建议口径",
+        "复核结论"
+      ],
+      "statuses": [
+        "待复核",
+        "复核中",
+        "已裁定"
+      ],
+      "actions": [
+        "开始复核",
+        "提交裁定"
+      ],
+      "action_targets": [
+        "复核中",
+        "已裁定"
+      ],
+      "metrics": [
+        "事项总数",
+        "复核中事项",
+        "已裁定事项"
+      ],
+      "desc": "组织指标口径争议的人工复核与裁定",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "metric_overview",
+      "name": "指标总览",
+      "entity": "概览条目",
+      "fields": [
+        "条目名称",
+        "统计口径",
+        "当前值",
+        "趋势方向",
+        "更新周期"
+      ],
+      "statuses": [
+        "正常",
+        "关注",
+        "异常"
+      ],
+      "actions": [
+        "刷新条目",
+        "确认异常"
+      ],
+      "action_targets": [
+        "正常",
+        "关注"
+      ],
+      "metrics": [
+        "条目总数",
+        "异常条目",
+        "关注条目"
+      ],
+      "desc": "总览指标平台的运行状态",
+      "page_shape": "analysis-dashboard",
+      "_page_shape_explicit": true
+    }
+  ]
+}
